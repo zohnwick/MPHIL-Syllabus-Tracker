@@ -2,257 +2,247 @@
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SyllabusTrack — RCI MPhil Clinical Psychology</title>
-  <meta name="description" content="Track your RCI MPhil Clinical Psychology syllabus with unit-by-unit topic completion, progress rings, and a beautiful interface." />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-  <meta name="theme-color" content="#0d0e12" media="(prefers-color-scheme: dark)" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SyllabusTrack V2 — RCI MPhil Clinical Psychology</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-<div class="app-container" id="app-container">
+<div class="desktop" id="desktop">
+  <div class="app window" id="app">
+    
+    <!-- Titlebar -->
+    <header class="titlebar">
+      <div class="traffic-lights">
+        <span class="tl tl-close"></span>
+        <span class="tl tl-min"></span>
+        <span class="tl tl-max"></span>
+      </div>
+      
+      <button class="menu-btn" id="menu-btn" aria-label="Toggle Menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/>
+      </svg>
+    </button>
 
-    <!-- ── Titlebar ──────────────────────────── -->
-    <header class="titlebar" id="titlebar">
-      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/>
-        </svg>
-      </button>
-      <div class="titlebar-center">
-        <div class="win-logo">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <span class="win-title">SyllabusTrack</span>
-        <span class="win-sep">·</span>
-        <span class="win-sub">RCI MPhil Clinical Psychology</span>
-      </div>
-      <div class="titlebar-right">
-        <button class="tb-btn" id="theme-btn" title="Toggle light/dark">
-          <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/>
-            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <button class="tb-btn tb-danger" id="reset-btn" title="Reset all progress">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M3 3v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-    </header>
-
-    <!-- ── Stats Bar ─────────────────────────── -->
-    <div class="stats-bar" id="stats-bar">
-      <div class="sb-left">
-        <span class="sb-label">Overall Progress</span>
-        <div class="sb-bar-wrap"><div class="sb-bar" id="sb-bar"></div></div>
-        <span class="sb-nums"><span id="sb-done">0</span>/<span id="sb-total">0</span></span>
-        <span class="sb-sep">·</span>
-        <span class="sb-pct" id="sb-pct">0%</span>
-      </div>
-      <div class="sb-chips">
-        <div class="sb-chip">
-          <span class="chip-dot" style="background:#5B4FDB"></span>
-          <span class="chip-lbl">Year 1</span>
-          <span class="chip-val" id="chip-y1">0%</span>
-        </div>
-        <div class="sb-chip">
-          <span class="chip-dot" style="background:#9333EA"></span>
-          <span class="chip-lbl">Year 2</span>
-          <span class="chip-val" id="chip-y2">0%</span>
-        </div>
-        <div class="sb-chip">
-          <span class="chip-dot" style="background:#0891B2"></span>
-          <span class="chip-lbl">Clinical</span>
-          <span class="chip-val" id="chip-cl">0%</span>
-        </div>
-      </div>
+    <div class="title-center">
+        <div class="app-logo">📚</div>
+        <span class="app-name">Syllabus Tracker</span>
+      <div class="app-sep"><</div>
+      <div class="app-sub">RCI MPhil Clinical Psychology</div>
     </div>
 
-    <!-- ── Window Body ───────────────────────── -->
-    <div class="window-body">
-      
-      <!-- Mobile Sidebar Overlay -->
-      <div class="mobile-overlay" id="mobile-overlay"></div>
+    <div class="title-right">
+      <button class="tb-btn tb-danger" id="reset-btn" title="Reset All Progress">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+      </button>
+      <button class="tb-btn" id="theme-btn" title="Toggle Theme">
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+    </div>
+  </header>
 
-      <!-- Sidebar -->
-      <aside class="sidebar" id="sidebar">
-        <div class="sidebar-search-wrap">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="search-icon-svg">
-            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
-            <path d="m16.5 16.5 3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <input type="search" id="search-input" class="sidebar-search" placeholder="Search papers…" autocomplete="off" />
-        </div>
+  <!-- Stats Bar -->
+  <div class="stats-bar">
+    <div class="sb-progress">
+      <span class="sb-label">Overall</span>
+      <div class="sb-bar-wrap">
+        <div class="sb-bar" id="sb-bar"></div>
+      </div>
+      <span class="sb-val" id="sb-val">0/0</span>
+      <span class="sb-pct" id="sb-pct">0%</span>
+    </div>
+    
+    <div class="sb-chips">
+      <div class="sb-chip"><div class="chip-dot" style="background:#007AFF"></div><span class="chip-label">Year 1</span><span class="chip-val" id="chip-y1">0%</span></div>
+      <div class="sb-chip"><div class="chip-dot" style="background:#AF52DE"></div><span class="chip-label">Year 2</span><span class="chip-val" id="chip-y2">0%</span></div>
+      <div class="sb-chip"><div class="chip-dot" style="background:#34C759"></div><span class="chip-label">Clinical</span><span class="chip-val" id="chip-cl">0%</span></div>
+    </div>
+  </div>
 
-        <nav class="sidebar-nav" id="sidebar-nav">
-          <div class="nav-section open">
-            <div class="nav-section-hdr">
-              <div class="hdr-left">
-                <svg class="nav-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>Internal Exams</span>
-              </div>
-              <div class="hdr-right">
-                <button class="tb-btn tb-add-exam" id="add-exam-btn" title="Create New Exam">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
-                  </svg>
-                </button>
-              </div>
+  <!-- Main Body -->
+  <div class="app-body">
+    
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m16.5 16.5 3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input type="text" id="search-input" placeholder="Search papers..." />
+      </div>
+
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <!-- Exams -->
+        <div class="nav-group open">
+          <div class="nav-group-hdr">
+            <div class="nav-group-left">
+              <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span>Internal Exams</span>
             </div>
-            <div id="nav-exams" class="nav-items"></div>
-          </div>
-          <div class="nav-section">
-            <div class="nav-section-hdr">
-              <div class="hdr-left">
-                <svg class="nav-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>Year 1 · Part I</span>
-              </div>
-              <span class="nav-pct" id="nav-y1-pct">0%</span>
-            </div>
-            <div id="nav-year1" class="nav-items"></div>
-          </div>
-          <div class="nav-section">
-            <div class="nav-section-hdr">
-              <div class="hdr-left">
-                <svg class="nav-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>Year 2 · Part II</span>
-              </div>
-              <span class="nav-pct" id="nav-y2-pct">0%</span>
-            </div>
-            <div id="nav-year2" class="nav-items"></div>
-          </div>
-          <div class="nav-section">
-            <div class="nav-section-hdr">
-              <div class="hdr-left">
-                <svg class="nav-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>Clinical Training</span>
-              </div>
-              <span class="nav-pct" id="nav-cl-pct">0%</span>
-            </div>
-            <div id="nav-clinical" class="nav-items"></div>
-          </div>
-        </nav>
-      </aside>
-
-      <!-- Sidebar divider -->
-      <div class="sidebar-divider"></div>
-
-      <!-- Detail Panel -->
-      <main class="detail-panel" id="detail-panel">
-
-        <!-- Welcome / empty state -->
-        <div class="welcome-view" id="welcome-view">
-          <div class="welcome-inner">
-            <div class="welcome-emoji">🧠</div>
-            <h2 class="welcome-title">Select a Paper</h2>
-            <p class="welcome-body">Choose any paper from the sidebar to view its units, sub-topics, and track your completion progress.</p>
-            <div class="welcome-grid" id="welcome-grid"></div>
-          </div>
-        </div>
-
-        <!-- Paper detail view (hidden until a paper is selected) -->
-        <div class="paper-view" id="paper-view" hidden>
-
-          <!-- Hero header -->
-          <div class="paper-hero" id="paper-hero">
-            <button class="mobile-back-btn" id="mobile-back-btn">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-              </svg>
-              Back
+            <button class="nav-add-btn" id="add-exam-btn" title="Create Exam">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>
             </button>
+          </div>
+          <div class="nav-group-items" id="nav-exams"></div>
+        </div>
+
+        <!-- Year 1 -->
+        <div class="nav-group open">
+          <div class="nav-group-hdr">
+            <div class="nav-group-left">
+              <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span>Year 1 A Part I</span>
+            </div>
+            <span class="nav-group-pct" id="nav-y1-pct">0%</span>
+          </div>
+          <div class="nav-group-items" id="nav-year1"></div>
+        </div>
+
+        <!-- Year 2 -->
+        <div class="nav-group open">
+          <div class="nav-group-hdr">
+            <div class="nav-group-left">
+              <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span>Year 2 A Part II</span>
+            </div>
+            <span class="nav-group-pct" id="nav-y2-pct">0%</span>
+          </div>
+          <div class="nav-group-items" id="nav-year2"></div>
+        </div>
+
+        <!-- Clinical -->
+        <div class="nav-group open">
+          <div class="nav-group-hdr">
+            <div class="nav-group-left">
+              <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span>Clinical Training</span>
+            </div>
+            <span class="nav-group-pct" id="nav-cl-pct">0%</span>
+          </div>
+          <div class="nav-group-items" id="nav-clinical"></div>
+        </div>
+      </nav>
+    </aside>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Main Content Area -->
+    <main class="main-content" id="main-content">
+      
+      <!-- Welcome View -->
+      <section class="view active" id="view-welcome">
+        <div class="welcome-container">
+          <div class="welcome-emoji">👋</div>
+          <h1 class="welcome-title">Select a Paper</h1>
+          <p class="welcome-desc">Choose any paper from the sidebar to view its units, sub-topics, and track your completion progress.</p>
+          <div class="grid" id="welcome-grid"></div>
+        </div>
+      </section>
+
+      <!-- Paper Detail View -->
+      <section class="view" id="view-paper">
+        <div class="paper-hero" id="paper-hero">
+          <button class="back-btn" id="back-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Home
+          </button>
+          
+          <div class="hero-content">
             <div class="hero-left">
-              <div class="hero-top-row">
-                <span class="hero-emoji" id="hero-emoji"></span>
+              <div class="hero-meta">
+                <span class="hero-icon" id="hero-icon"></span>
                 <span class="hero-number" id="hero-number"></span>
               </div>
               <h2 class="hero-title" id="hero-title"></h2>
-              <p class="hero-desc"  id="hero-desc"></p>
-              <div class="hero-pills" id="hero-pills"></div>
-              <button class="dbtn cancel delete-exam-btn" id="delete-exam-btn" style="display: none; margin-top: 12px; font-size: 0.8rem; padding: 4px 10px; color: var(--danger);">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-top; margin-right: 4px;">
-                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
+              <p class="hero-desc" id="hero-desc"></p>
+              
+              <button class="delete-btn" id="delete-exam-btn" style="display:none;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 Delete Exam
               </button>
             </div>
-            <div class="hero-ring-wrap">
-              <svg class="hero-ring-svg" viewBox="0 0 88 88">
-                <circle class="ring-track"    cx="44" cy="44" r="36"/>
-                <circle class="ring-progress" id="hero-ring" cx="44" cy="44" r="36"
-                  stroke-dasharray="226" stroke-dashoffset="226"/>
+            
+            <div class="hero-right">
+              <svg class="progress-ring" viewBox="0 0 88 88">
+                <circle class="ring-track" cx="44" cy="44" r="36"/>
+                <circle class="ring-fill" id="hero-ring" cx="44" cy="44" r="36"/>
               </svg>
-              <div class="ring-inner">
-                <span class="ring-pct" id="ring-pct">0%</span>
-                <span class="ring-sub">done</span>
+              <div class="ring-text">
+                <span class="ring-val" id="ring-val">0%</span>
+                <span class="ring-lbl">done</span>
               </div>
             </div>
           </div>
-
-          <!-- Units container -->
-          <div class="units-container" id="units-container"></div>
-
         </div>
-      </main>
-    </div><!-- /window-body -->
-</div><!-- /app-container -->
 
-<!-- Reset dialog -->
-<div class="dialog-overlay" id="dialog-overlay">
-  <div class="dialog" id="dialog" role="dialog" aria-modal="true">
-    <div class="dialog-warn">⚠️</div>
-    <h3 class="dialog-title">Reset All Progress?</h3>
-    <p class="dialog-body">All checked topics across every paper will be cleared. This cannot be undone.</p>
-    <div class="dialog-btns">
-      <button class="dbtn cancel" id="dlg-cancel">Cancel</button>
-      <button class="dbtn confirm" id="dlg-confirm">Reset Everything</button>
+        <div class="units-container" id="units-container"></div>
+      </section>
+    </main>
+
+  </div>
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="reset-modal">
+  <div class="modal">
+    <div class="modal-warn">⚠️</div>
+    <h3>Reset All Progress?</h3>
+    <p>All checked topics across every paper will be cleared. This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="document.getElementById('reset-modal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-confirm" id="confirm-reset-btn">Reset Everything</button>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-<!-- Create Exam Modal -->
-<div class="dialog-overlay" id="exam-modal-overlay">
-  <div class="dialog exam-dialog" id="exam-modal" role="dialog" aria-modal="true">
-    <div class="dialog-hdr">
-      <h3 class="dialog-title">Create Internal Exam</h3>
-      <button class="dlg-close" id="exam-close-btn">&times;</button>
+<div class="modal-overlay" id="exam-modal">
+  <div class="modal exam-modal">
+    <div class="modal-hdr">
+      <h3>Create Internal Exam</h3>
+      <button class="close-btn" onclick="document.getElementById('exam-modal').classList.remove('open')">&times;</button>
     </div>
-    <div class="dialog-body">
-      <div class="input-group">
-        <label for="exam-name">Exam Name</label>
+    <div class="modal-body">
+      <div class="input-grp">
+        <label>Exam Name</label>
         <input type="text" id="exam-name" placeholder="e.g. Midterm Year 1" />
       </div>
-      <div class="input-group">
+      <div class="input-grp">
         <label>Select Topics to Include</label>
-        <div class="syllabus-tree" id="exam-syllabus-tree">
-          <!-- Dynamically populated by JS -->
-        </div>
+        <div class="tree" id="exam-tree"></div>
       </div>
     </div>
-    <div class="dialog-btns">
-      <button class="dbtn cancel" id="exam-cancel-btn">Cancel</button>
-      <button class="dbtn confirm" id="exam-save-btn">Save Exam</button>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="document.getElementById('exam-modal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-confirm" id="save-exam-btn">Save Exam</button>
     </div>
   </div>
 </div>
 
-<script src="app.js"></script>
+<div class="toast" id="toast"></div>
+
+<script src="main.js"></script>
 </body>
 </html>
