@@ -1,7 +1,7 @@
-
+﻿
 const SYLLABUS = {
   year1: {
-    label: 'Year 1 â€” Part I',
+    label: 'Year 1 — Part I',
     papers: [
       {
         id: 'p11',
@@ -192,7 +192,7 @@ const SYLLABUS = {
   },
 
   year2: {
-    label: 'Year 2 â€” Part II',
+    label: 'Year 2 — Part II',
     papers: [
       {
         id: 'p21',
@@ -848,7 +848,7 @@ function initExams() {
       title: name,
       description: 'Custom selection of topics for internal exam preparation.',
       color: '#5B4FDB',
-      icon: 'ðŸ“',
+      icon: '📝',
       completed: {},
       units: []
     };
@@ -891,24 +891,73 @@ function initExams() {
   });
 }
 
+window.showWizYears = () => {
+  document.querySelectorAll('.wiz-view').forEach(el => el.style.display = 'none');
+  el('wiz-years').style.display = 'block';
+};
+window.showWizYear = (yrKey) => {
+  document.querySelectorAll('.wiz-view').forEach(el => el.style.display = 'none');
+  el('wiz-yr-' + yrKey).style.display = 'block';
+};
+window.showWizPaper = (pId) => {
+  document.querySelectorAll('.wiz-view').forEach(el => el.style.display = 'none');
+  el('wiz-p-' + pId).style.display = 'block';
+};
+
 function renderExamTree() {
   const tree = el('exam-tree');
   let html = '';
-  Object.keys(SYLLABUS).forEach(yr => {
-    SYLLABUS[yr].papers.forEach(p => {
-      html += `<label class="cb-paper">${p.shortTitle}</label>`;
-      p.units.forEach(u => {
-        html += `<div style="margin-left:10px;">
-          <div style="font-weight:600;font-size:0.8rem;color:var(--fg-muted);margin:8px 0 4px;">${u.title}</div>`;
-        u.topics.forEach(t => {
-          html += `<label class="cb-unit-label">
-            <input type="checkbox" class="cb-topic" value="${t.id}" /> ${t.text}
-          </label>`;
+  
+  html += `<div id="wiz-years" class="wiz-view" style="display:block;">`;
+  html += `<div style="font-weight:600;font-size:0.95rem;color:var(--fg);margin-bottom:12px;">Step 1: Choose a Year</div>`;
+  html += `<div style="display:flex;flex-direction:column;gap:8px;">`;
+  Object.keys(SYLLABUS).forEach(yrKey => {
+     html += `<button type="button" class="wizard-btn" onclick="showWizYear('${yrKey}')">
+       <span>${SYLLABUS[yrKey].label}</span>
+       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--fg-muted)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+     </button>`;
+  });
+  html += `</div></div>`;
+  
+  Object.keys(SYLLABUS).forEach(yrKey => {
+     html += `<div id="wiz-yr-${yrKey}" class="wiz-view" style="display:none;">`;
+     html += `<button type="button" class="wizard-back" onclick="showWizYears()">
+       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+       Back to Years
+     </button>`;
+     html += `<div style="font-weight:600;font-size:0.95rem;color:var(--fg);margin-bottom:12px;">Step 2: Choose a Paper</div>`;
+     html += `<div style="display:flex;flex-direction:column;gap:8px;">`;
+     SYLLABUS[yrKey].papers.forEach(p => {
+        html += `<button type="button" class="wizard-btn" onclick="showWizPaper('${p.id}')">
+          <span>${p.shortTitle}</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--fg-muted)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </button>`;
+     });
+     html += `</div></div>`;
+     
+     SYLLABUS[yrKey].papers.forEach(p => {
+        html += `<div id="wiz-p-${p.id}" class="wiz-view" style="display:none;">`;
+        html += `<button type="button" class="wizard-back" onclick="showWizYear('${yrKey}')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          Back to ${SYLLABUS[yrKey].label}
+        </button>`;
+        html += `<div style="font-weight:600;font-size:0.95rem;color:var(--fg);margin-bottom:12px;">Step 3: Select Topics</div>`;
+        
+        p.units.forEach(u => {
+          html += `<div style="margin-top:16px;">
+            <div style="font-weight:700;font-size:0.8rem;color:var(--fg-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;">Unit ${u.number}: ${u.title}</div>`;
+          u.topics.forEach(t => {
+            html += `<label class="cb-unit-label">
+              <input type="checkbox" class="cb-topic" value="${t.id}" />
+              <span style="line-height:1.4;font-weight:500;">${t.text}</span>
+            </label>`;
+          });
+          html += `</div>`;
         });
         html += `</div>`;
-      });
-    });
+     });
   });
+  
   tree.innerHTML = html;
 }
 
@@ -971,7 +1020,7 @@ function init() {
   });
 
   // Mobile Menu
-  el('menu-btn').addEventListener('click', () => document.querySelector('.app').classList.add('sidebar-open'));
+  el('menu-btn').addEventListener('click', () => document.querySelector('.app').classList.toggle('sidebar-open'));
   el('sidebar-overlay').addEventListener('click', () => document.querySelector('.app').classList.remove('sidebar-open'));
   el('back-btn').addEventListener('click', goHome);
 
@@ -1002,4 +1051,5 @@ function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
 
