@@ -1,4 +1,4 @@
-﻿
+
 const SYLLABUS = {
   year1: {
     label: 'Year 1 — Part I',
@@ -862,7 +862,7 @@ function initExams() {
           if (matched.length > 0) {
             exam.units.push({
               id: 'ex_u' + (unitIdx++),
-              number: p.shortTitle,
+              number: p.icon,
               title: u.title,
               topics: matched.map(t => ({ id: t.id, text: t.text }))
             });
@@ -902,6 +902,14 @@ window.showWizYear = (yrKey) => {
 window.showWizPaper = (pId) => {
   document.querySelectorAll('.wiz-view').forEach(el => el.style.display = 'none');
   el('wiz-p-' + pId).style.display = 'block';
+};
+window.toggleUnitTopics = (masterCb, uId) => {
+  const container = document.getElementById('wiz-topics-' + uId);
+  if (container) {
+    container.querySelectorAll('.cb-topic').forEach(cb => {
+      cb.checked = masterCb.checked;
+    });
+  }
 };
 
 function renderExamTree() {
@@ -944,15 +952,22 @@ function renderExamTree() {
         html += `<div style="font-weight:600;font-size:0.95rem;color:var(--fg);margin-bottom:12px;">Step 3: Select Topics</div>`;
         
         p.units.forEach(u => {
-          html += `<div style="margin-top:16px;">
-            <div style="font-weight:700;font-size:0.8rem;color:var(--fg-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;">Unit ${u.number}: ${u.title}</div>`;
+          html += `<details class="wiz-unit-details" style="margin-top:12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-body); overflow:hidden;">
+            <summary style="font-weight:700;font-size:0.8rem;color:var(--fg-muted);padding:10px 14px;text-transform:uppercase;letter-spacing:0.05em;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;user-select:none;background:var(--bg-hover);">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <input type="checkbox" class="cb-topic" title="Select entire unit" onclick="event.stopPropagation(); window.toggleUnitTopics(this, '${u.id}')" />
+                <span>Unit ${u.number}: ${u.title}</span>
+              </div>
+              <svg class="sum-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+            </summary>
+            <div style="padding:12px 14px;" id="wiz-topics-${u.id}">`;
           u.topics.forEach(t => {
-            html += `<label class="cb-unit-label">
+            html += `<label class="cb-unit-label" style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="line-height:1.4;font-weight:500;padding-right:12px;">${t.text}</span>
               <input type="checkbox" class="cb-topic" value="${t.id}" />
-              <span style="line-height:1.4;font-weight:500;">${t.text}</span>
             </label>`;
           });
-          html += `</div>`;
+          html += `</div></details>`;
         });
         html += `</div>`;
      });
