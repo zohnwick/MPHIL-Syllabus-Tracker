@@ -548,20 +548,49 @@ const SYLLABUS = {
 const el = id => document.getElementById(id);
 const lsKey = 'SyllabusTrack_V2_State';
 
+// Supabase Configuration
+const supabaseUrl = 'https://htwqqudpxiejwfnvqvby.supabase.co';
+const supabaseKey = 'sb_publishable_5g23amnqlSU3NpE-njdAzw_po8w17DY';
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+let currentUser = null;
+
 let state = {
   completed: {},
-  exams: []
+  exams: [],
+  notes: []
 };
 let activePaper = null;
 
-function loadState() {
+async function loadState() {
+  if (!currentUser) return;
   try {
-    const s = localStorage.getItem(lsKey);
-    if (s) state = JSON.parse(s);
-  } catch (e) { console.error('Failed to load state', e); }
+    const { data, error } = await supabaseClient
+      .from('user_state')
+      .select('data')
+      .eq('id', currentUser.id)
+      .single();
+      
+    if (data && data.data) {
+      state = data.data;
+      if (!state.notes) state.notes = [];
+    } else {
+      saveState(); // Initialize empty state in cloud
+    }
+  } catch (e) {
+    console.error('Failed to load state', e);
+  }
 }
-function saveState() {
-  localStorage.setItem(lsKey, JSON.stringify(state));
+
+async function saveState() {
+  if (!currentUser) return;
+  try {
+    await supabaseClient
+      .from('user_state')
+      .upsert({ id: currentUser.id, data: state });
+  } catch (e) {
+    console.error('Failed to save state', e);
+  }
 }
 
 function calcPaperProgress(paper) {
@@ -737,15 +766,28 @@ function showPaper(paper) {
       </div>
       <div class="topics">
     `;
-    u.topics.forEach(t => {
-      const doneClass = compSrc[t.id] ? ' done' : '';
-      html += `
-        <div class="topic${doneClass}" data-tid="${t.id}" data-uid="${u.id}">
-          <div class="topic-check"></div>
-          <div class="topic-text">${t.text}</div>
-        </div>
-      `;
-    });
+      u.topics.forEach(t => {
+        const doneClass = compSrc[t.id] ? ' done' : '';
+        const topicNotes = state.notes ? state.notes.filter(n => n.linkedTopicId === t.id) : [];
+        let noteBadge = '';
+        if (topicNotes.length > 0) {
+          const cases = topicNotes.filter(n => n.type === 'case_report').length;
+          const label = cases > 0 ? (cases > 1 ? `${cases} Cases` : `1 Case`) : (topicNotes.length > 1 ? `${topicNotes.length} Notes` : `1 Note`);
+          noteBadge = `<span class="note-badge" onclick="event.stopPropagation(); window.showTopicNotes('${t.id}')">${label}</span>`;
+        }
+        
+        html += `
+          <div class="topic${doneClass}" data-tid="${t.id}" data-uid="${u.id}" style="justify-content:space-between; align-items:center;">
+            <div style="display:flex; gap:16px; align-items:flex-start; flex:1;">
+              <div class="topic-check" style="margin-top:2px;"></div>
+              <div class="topic-text">${t.text} ${noteBadge}</div>
+            </div>
+            <button class="add-note-btn" onclick="event.stopPropagation(); window.openNoteModal(null, '${t.id}')" title="Add Note">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        `;
+      });
     html += `</div>`;
     div.innerHTML = html;
     
@@ -793,7 +835,7 @@ function showPaper(paper) {
   el('ring-val').textContent = prog.pct + '%';
 
   // Toggle View
-  el('view-welcome').classList.remove('active');
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   el('view-paper').classList.add('active');
   el('app').classList.remove('sidebar-open');
 }
@@ -801,7 +843,7 @@ function showPaper(paper) {
 function goHome() {
   activePaper = null;
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  el('view-paper').classList.remove('active');
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   el('view-welcome').classList.add('active');
 }
 
@@ -1016,16 +1058,265 @@ function normalizeSyllabus() {
   });
 }
 
+// --- Notes Logic ---
+window.showNotesView = () => {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el('view-notes').classList.add('active');
+  const n = el('nav-notes'); if (n) n.classList.add('active');
+  renderNotesView();
+};
+
+window.renderNotesView = () => {
+  const grid = el('notes-grid');
+  grid.innerHTML = '';
+  if (!state.notes || state.notes.length === 0) {
+    grid.innerHTML = '<div style="color:var(--fg-muted); padding:20px; grid-column: 1 / -1;">No notes yet. Create one!</div>';
+    return;
+  }
+  
+  const sorted = [...state.notes].sort((a,b) => new Date(b.date) - new Date(a.date));
+  
+  let html = '';
+  sorted.forEach(note => {
+    let badgeColor = 'var(--accent)';
+    let badgeText = 'Note';
+    if (note.type === 'case_report') { badgeColor = '#ff3b30'; badgeText = 'Case Report'; }
+    if (note.type === 'lecture') { badgeColor = '#34c759'; badgeText = 'Lecture'; }
+    
+    let linkedTopicHtml = '';
+    if (note.linkedTopicId) {
+      linkedTopicHtml = `<div style="font-size:0.75rem; color:var(--fg-muted); margin-top:12px; display:flex; align-items:center; gap:6px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"></path></svg>
+        Linked to syllabus
+      </div>`;
+    }
+    
+    const tmp = document.createElement('div');
+    tmp.innerHTML = note.content;
+    const cleanText = tmp.textContent || tmp.innerText || '';
+    
+    html += `<div class="note-card" style="background:var(--bg-panel); border:1px solid var(--border); border-radius:12px; padding:20px; cursor:pointer; transition:transform 0.2s, box-shadow 0.2s;" onclick="openNoteModal('${note.id}')" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+        <span style="background:${badgeColor}22; color:${badgeColor}; font-size:0.7rem; font-weight:700; padding:4px 8px; border-radius:6px; text-transform:uppercase;">${badgeText}</span>
+        <span style="font-size:0.75rem; color:var(--fg-muted);">${new Date(note.date).toLocaleDateString()}</span>
+      </div>
+      <h3 style="font-weight:700; font-size:1.1rem; color:var(--fg); margin-bottom:8px; line-height:1.3;">${note.title}</h3>
+      <p style="font-size:0.9rem; color:var(--fg-muted); line-height:1.5; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;">${cleanText}</p>
+      ${linkedTopicHtml}
+    </div>`;
+  });
+  grid.innerHTML = html;
+};
+
+window.openNoteModal = (noteId = null, linkedTopicId = null) => {
+  el('nm-title-hdr').textContent = noteId ? 'Edit Note' : 'Create Note';
+  const btnDel = el('delete-note-btn');
+  btnDel.style.display = noteId ? 'block' : 'none';
+  if (noteId) {
+    btnDel.onclick = () => window.deleteNote(noteId);
+  }
+  
+  const note = noteId ? state.notes.find(n => n.id === noteId) : null;
+  el('nm-id').value = note ? note.id : '';
+  el('nm-title').value = note ? note.title : '';
+  el('nm-type').value = note ? note.type : 'note';
+  el('nm-content-rich').innerHTML = note ? note.content : '';
+  el('nm-linked').value = note ? (note.linkedTopicId || '') : (linkedTopicId || '');
+  
+  el('note-modal-overlay').classList.add('open');
+};
+
+window.saveNote = () => {
+  const id = el('nm-id').value || 'note_' + Date.now();
+  const title = el('nm-title').value.trim();
+  const content = el('nm-content-rich').innerHTML;
+  if (!title) { alert('Title is required'); return; }
+  
+  const note = {
+    id,
+    title,
+    content,
+    type: el('nm-type').value,
+    linkedTopicId: el('nm-linked').value,
+    date: new Date().toISOString()
+  };
+  
+  const existingIdx = state.notes.findIndex(n => n.id === id);
+  if (existingIdx > -1) {
+    note.date = state.notes[existingIdx].date;
+    state.notes[existingIdx] = note;
+  } else {
+    state.notes.push(note);
+  }
+  
+  saveState();
+  el('note-modal-overlay').classList.remove('open');
+  showToast('Note saved!');
+  
+  if (el('view-notes').classList.contains('active')) {
+    renderNotesView();
+  } else {
+    if (activePaper) {
+      let p;
+      if (activePaper.startsWith('exam_')) p = state.exams.find(e => e.id === activePaper);
+      else p = Object.values(SYLLABUS).flatMap(y => y.papers).find(x => x.id === activePaper);
+      if (p) showPaper(p);
+    }
+  }
+};
+
+window.deleteNote = (id) => {
+  if (!confirm('Are you sure you want to delete this note?')) return;
+  state.notes = state.notes.filter(n => n.id !== id);
+  saveState();
+  el('note-modal-overlay').classList.remove('open');
+  showToast('Note deleted');
+  
+  if (el('view-notes').classList.contains('active')) renderNotesView();
+  else if (activePaper) {
+    let p;
+    if (activePaper.startsWith('exam_')) p = state.exams.find(e => e.id === activePaper);
+    else p = Object.values(SYLLABUS).flatMap(y => y.papers).find(x => x.id === activePaper);
+    if (p) showPaper(p);
+  }
+};
+
+window.showTopicNotes = (topicId) => {
+  const notes = state.notes.filter(n => n.linkedTopicId === topicId);
+  const container = el('topic-notes-list');
+  container.innerHTML = '';
+  
+  if (notes.length === 0) {
+    container.innerHTML = '<div style="color:var(--fg-muted);">No notes yet for this topic.</div>';
+  } else {
+    notes.forEach(note => {
+      let badgeColor = 'var(--accent)';
+      if (note.type === 'case_report') badgeColor = '#ff3b30';
+      if (note.type === 'lecture') badgeColor = '#34c759';
+      
+      const tmp = document.createElement('div');
+      tmp.innerHTML = note.content;
+      const cleanText = tmp.textContent || tmp.innerText || '';
+      
+      const div = document.createElement('div');
+      div.style.cssText = `background:var(--bg-hover); border-radius:8px; padding:12px; cursor:pointer; border:1px solid var(--border); transition:transform 0.2s;`;
+      div.onmouseover = () => div.style.transform = 'translateX(4px)';
+      div.onmouseout = () => div.style.transform = 'none';
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+          <strong style="font-size:0.95rem; color:var(--fg);">${note.title}</strong>
+          <div style="width:10px; height:10px; border-radius:50%; background:${badgeColor}; align-self:center;" title="${note.type}"></div>
+        </div>
+        <div style="font-size:0.85rem; color:var(--fg-muted); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${cleanText}</div>
+      `;
+      div.onclick = () => {
+        el('topic-notes-modal-overlay').classList.remove('open');
+        openNoteModal(note.id);
+      };
+      container.appendChild(div);
+    });
+  }
+  
+  el('tnm-create-btn').onclick = () => {
+    el('topic-notes-modal-overlay').classList.remove('open');
+    openNoteModal(null, topicId);
+  };
+  
+  el('topic-notes-modal-overlay').classList.add('open');
+};
+
+window.formatText = (command, value = null) => {
+  document.execCommand(command, false, value);
+  el('nm-content-rich').focus();
+};
+
+window.importWordDoc = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(loadEvent) {
+    const arrayBuffer = loadEvent.target.result;
+    
+    mammoth.convertToHtml({arrayBuffer: arrayBuffer})
+      .then(function(result) {
+        const html = result.value; 
+        const editor = el('nm-content-rich');
+        editor.innerHTML = html + '<br><br>' + editor.innerHTML;
+        showToast('Document imported successfully!');
+        
+        // Auto-fill title if empty
+        if (!el('nm-title').value) {
+          el('nm-title').value = file.name.replace('.docx', '');
+        }
+      })
+      .catch(function(err) {
+        console.error(err);
+        alert('Error importing document. Please try a different .docx file.');
+      });
+  };
+  reader.readAsArrayBuffer(file);
+  
+  // Reset the file input so the same file can be selected again
+  event.target.value = '';
+};
+
+// Auth Logic
+async function signUp() {
+  const email = el('auth-email').value;
+  const password = el('auth-password').value;
+  if (!email || !password) { showToast('Please enter email and password'); return; }
+  
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+  if (error) alert(error.message);
+  else showToast('Account created! Logging in...');
+}
+
+async function signIn() {
+  const email = el('auth-email').value;
+  const password = el('auth-password').value;
+  if (!email || !password) { showToast('Please enter email and password'); return; }
+  
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) alert(error.message);
+}
+
+async function signOut() {
+  await supabaseClient.auth.signOut();
+  state = { completed: {}, exams: [], notes: [] }; // Clear local memory
+  el('auth-email').value = '';
+  el('auth-password').value = '';
+}
+
+function setupAuthListener() {
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    if (session) {
+      currentUser = session.user;
+      el('auth-overlay').classList.remove('open');
+      await loadState();
+      updateStats();
+      renderSidebar();
+      if (el('view-notes').classList.contains('active')) renderNotesView();
+      else if (activePaper) {
+        let p = activePaper.startsWith('exam_') ? state.exams.find(e => e.id === activePaper) : Object.values(SYLLABUS).flatMap(y => y.papers).find(x => x.id === activePaper);
+        if (p) showPaper(p);
+      }
+    } else {
+      currentUser = null;
+      el('auth-overlay').classList.add('open');
+    }
+  });
+}
+
 // App Initialization
 function init() {
   normalizeSyllabus();
-  loadState();
-  updateStats();
-  renderSidebar();
+  setupAuthListener();
   renderWelcome();
   initSearch();
   initExams();
-
+  
   // Accordions
   document.querySelectorAll('.nav-group-hdr').forEach(hdr => {
     hdr.addEventListener('click', (e) => {

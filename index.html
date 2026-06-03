@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -93,6 +95,12 @@
       </div>
 
       <nav class="sidebar-nav" id="sidebar-nav">
+        <!-- Notes -->
+        <div class="nav-item" onclick="showNotesView()" id="nav-notes">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5l4 4L7 21H3v-4L16.5 3.5z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span style="font-weight:600;font-size:0.95rem;">Notes & Cases</span>
+        </div>
+        
         <!-- Exams -->
         <div class="nav-group open">
           <div class="nav-group-hdr">
@@ -142,8 +150,12 @@
           </div>
           <div class="nav-group-items" id="nav-clinical"></div>
         </div>
-      </nav>
-    </aside>
+        </nav>
+        
+        <div style="margin-top:auto; padding:20px; border-top:1px solid var(--border);">
+          <button class="btn" style="width:100%; background:var(--bg-hover); color:var(--fg);" onclick="signOut()">Sign Out</button>
+        </div>
+      </aside>
 
     <div class="sidebar-divider"></div>
 
@@ -157,6 +169,27 @@
           <h1 class="welcome-title">Select a Paper</h1>
           <p class="welcome-desc">Choose any paper from the sidebar to view its units, sub-topics, and track your completion progress.</p>
           <div class="grid" id="welcome-grid"></div>
+        </div>
+      </section>
+
+      <!-- Notes View -->
+      <section class="view" id="view-notes">
+        <div class="paper-hero" style="background: linear-gradient(135deg, var(--bg-hover), var(--bg-body)); border-bottom: 1px solid var(--border);">
+          <div class="hero-content">
+            <div class="hero-left">
+              <h1 class="hero-title">Notes & Case Reports</h1>
+              <p class="hero-desc">Your clinical knowledge base linked directly to the syllabus.</p>
+            </div>
+            <div class="hero-right" style="text-align: right;">
+              <button class="btn btn-primary" onclick="openNoteModal(null, null)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>
+                Create Note
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="units-container">
+          <div id="notes-grid" class="notes-grid"></div>
         </div>
       </section>
 
@@ -242,6 +275,102 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Note Modals -->
+<div class="modal-overlay" id="note-modal-overlay">
+  <div class="modal note-modal" id="note-modal" style="max-width: 650px; text-align: left; padding: 24px 32px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+      <h2 style="font-weight:700; font-size:1.5rem; color:var(--fg);" id="nm-title-hdr">Create Note</h2>
+      <button class="close-modal-btn" onclick="document.getElementById('note-modal-overlay').classList.remove('open')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--fg-muted)" stroke-width="2"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    
+    <div style="display:flex; gap:16px; margin-bottom:20px;">
+      <div class="input-grp" style="flex:2;">
+        <label>Title</label>
+        <input type="text" id="nm-title" placeholder="e.g. Case Study: CBT for Anxiety" />
+      </div>
+      <div class="input-grp" style="flex:1;">
+        <label>Type</label>
+        <select id="nm-type" style="width:100%; padding:12px 16px; border-radius:10px; border:2px solid transparent; background:var(--bg-hover); outline:none; font-size:0.95rem; color:var(--fg); cursor:pointer;">
+          <option value="note">General Note</option>
+          <option value="case_report">Case Report</option>
+          <option value="lecture">Lecture Notes</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="input-grp" style="margin-bottom:28px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <label style="margin-bottom:0;">Content</label>
+        <div class="rt-toolbar">
+          <button type="button" class="rt-btn" onclick="formatText('bold')" title="Bold"><strong>B</strong></button>
+          <button type="button" class="rt-btn" onclick="formatText('italic')" title="Italic" style="font-style:italic;">I</button>
+          <button type="button" class="rt-btn" onclick="formatText('underline')" title="Underline" style="text-decoration:underline;">U</button>
+          <div class="rt-divider"></div>
+          <button type="button" class="rt-btn" onclick="formatText('formatBlock', 'H2')" title="Heading 2">H2</button>
+          <button type="button" class="rt-btn" onclick="formatText('formatBlock', 'H3')" title="Heading 3">H3</button>
+          <div class="rt-divider"></div>
+          <button type="button" class="rt-btn" onclick="formatText('insertUnorderedList')" title="Bullet List">•</button>
+          <button type="button" class="rt-btn" onclick="formatText('insertOrderedList')" title="Number List">1.</button>
+        </div>
+      </div>
+      <div id="nm-content-rich" contenteditable="true" class="rt-editor" placeholder="Write your clinical notes here..."></div>
+    </div>
+    
+    <input type="hidden" id="nm-id" value="" />
+    <input type="hidden" id="nm-linked" value="" />
+    
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; gap:12px;">
+        <button type="button" class="btn" id="delete-note-btn" style="background:rgba(255,59,48,0.1); color:#ff3b30; display:none;">Delete</button>
+        <label class="btn" style="background:var(--bg-hover); color:var(--fg); cursor:pointer; display:inline-flex; align-items:center; gap:6px; margin:0;">
+          <input type="file" id="docx-upload" accept=".docx" style="display:none;" onchange="importWordDoc(event)" />
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          Import .docx
+        </label>
+      </div>
+      <div style="display:flex; gap:12px; margin-left:auto;">
+        <button type="button" class="btn" style="background:var(--bg-hover); color:var(--fg);" onclick="document.getElementById('note-modal-overlay').classList.remove('open')">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveNote()">Save Note</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="topic-notes-modal-overlay">
+  <div class="modal" id="topic-notes-modal" style="max-width: 500px; text-align:left;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h2 style="font-weight:700; font-size:1.2rem; color:var(--fg);">Linked Notes</h2>
+      <button class="close-modal-btn" onclick="document.getElementById('topic-notes-modal-overlay').classList.remove('open')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--fg-muted)" stroke-width="2"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div id="topic-notes-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:24px; max-height:60vh; overflow-y:auto; padding-right:8px;"></div>
+    <button class="btn btn-primary" style="width:100%;" id="tnm-create-btn">Create New Note</button>
+  </div>
+</div>
+
+<!-- Auth Modal -->
+<div class="modal-overlay open" id="auth-overlay" style="z-index: 1000; background: var(--bg-body);">
+  <div class="modal auth-modal" style="max-width: 400px; text-align: center; padding: 40px 32px;">
+    <h2 style="font-weight:700; font-size:1.8rem; margin-bottom:8px; color:var(--fg);">SyllabusTrack</h2>
+    <p style="color:var(--fg-muted); margin-bottom:32px;">Sign in to sync your progress</p>
+    
+    <div class="input-grp" style="text-align: left;">
+      <label>Email</label>
+      <input type="email" id="auth-email" placeholder="you@example.com" />
+    </div>
+    <div class="input-grp" style="text-align: left; margin-bottom:32px;">
+      <label>Password</label>
+      <input type="password" id="auth-password" placeholder="••••••••" />
+    </div>
+    
+    <button class="btn btn-primary" style="width:100%; margin-bottom:12px; padding:12px; font-size:1rem;" id="auth-signin-btn" onclick="signIn()">Sign In</button>
+    <button class="btn" style="width:100%; background:var(--bg-hover); color:var(--fg); padding:12px; font-size:1rem;" id="auth-signup-btn" onclick="signUp()">Create Account</button>
+  </div>
+</div>
 
 <script src="main.js"></script>
 </body>
