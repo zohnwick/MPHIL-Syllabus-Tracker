@@ -410,7 +410,7 @@ details[open] > summary .sum-chevron { transform: rotate(90deg); }
 
 .cb-unit-label { display: flex; align-items: flex-start; gap: 12px; padding: 8px 12px; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; border-radius: 8px; }
 .cb-unit-label:hover { background: var(--bg-hover); }
-.cb-topic { appearance: none; width: 18px; height: 18px; border: 2px solid var(--fg-muted); border-radius: 4px; margin-top: 2px; outline: none; cursor: pointer; transition: all 0.2s; position: relative; flex-shrink: 0; }
+.cb-topic { appearance: none; -webkit-appearance: none; width: 16px !important; height: 16px !important; flex: 0 0 16px !important; border: 1.5px solid var(--fg-muted); border-radius: 4px; margin-top: 2px; outline: none; cursor: pointer; transition: all 0.2s; position: relative; }
 .cb-topic:checked { background: var(--accent); border-color: var(--accent); }
 .cb-topic:checked::after { content: ''; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); }
 
