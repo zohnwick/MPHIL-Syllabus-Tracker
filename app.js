@@ -36,6 +36,10 @@ function generateId() {
 const expandedUnits = new Set();
 
 // ─── Full Syllabus Data (Official RCI M.Phil) ─────
+window.onerror = function(msg, url, line) {
+  document.body.innerHTML += '<div style="position:fixed;top:50px;left:0;right:0;background:orange;color:white;padding:20px;z-index:9999;font-size:20px;">GLOBAL ERROR: ' + msg + ' (Line ' + line + ')</div>';
+};
+
 const SYLLABUS = {
   year1: {
     label: 'Year 1 — Part I',
@@ -752,6 +756,10 @@ function selectPaper(paperId) {
   try {
     activePaperId = paperId;
 
+    // On mobile, close sidebar when a paper is selected
+    const appContainer = el('app-container');
+    if (appContainer) appContainer.classList.remove('sidebar-open');
+
     // Update sidebar active state
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     const navItem = document.querySelector('.nav-item[data-paper="' + paperId + '"]');
@@ -777,7 +785,7 @@ function selectPaper(paperId) {
     const appContainer = el('app-container');
     if (appContainer && !appContainer.classList.contains('view-detail')) {
       appContainer.classList.add('view-detail');
-      history.pushState({ panel: 'detail' }, '', '#detail');
+      try { history.pushState({ panel: 'detail' }, '', '#detail'); } catch(e) {}
     }
 
     renderPaperDetail(paper);
@@ -787,6 +795,7 @@ function selectPaper(paperId) {
     if (panel) panel.scrollTop = 0;
   } catch(err) {
     console.error('[ST] selectPaper error:', err);
+    alert('SelectPaper Error: ' + err.message);
   }
 }
 
@@ -1027,15 +1036,37 @@ function initReset() {
         const yr = SYLLABUS.year1.papers.find(p=>p.id===activePaperId) ? 'year1' : 
                    SYLLABUS.year2.papers.find(p=>p.id===activePaperId) ? 'year2' : 'clinical';
         const p = SYLLABUS[yr].papers.find(p=>p.id===activePaperId);
-        if (p) selectPaper(p);
+        if (p) {
+          selectPaper(p.id);
+          // On mobile, close sidebar when a paper is selected
+          const appContainer = el('app-container');
+          if (appContainer) appContainer.classList.remove('sidebar-open');
+        }
       }
     }
     showToast('All progress reset');
   });
 
-  // Mobile Back Button uses history routing
+  // Mobile Back Button uses history routing, with fallback
   el('mobile-back-btn')?.addEventListener('click', () => {
-    history.back();
+    if (history.state && history.state.panel === 'detail') {
+      history.back();
+    } else {
+      const appContainer = el('app-container');
+      if (appContainer) appContainer.classList.remove('view-detail');
+    }
+  });
+
+  // Mobile Hamburger Menu
+  el('mobile-menu-btn')?.addEventListener('click', () => {
+    const appContainer = el('app-container');
+    if (appContainer) appContainer.classList.add('sidebar-open');
+  });
+  
+  // Mobile Overlay to close sidebar
+  el('mobile-overlay')?.addEventListener('click', () => {
+    const appContainer = el('app-container');
+    if (appContainer) appContainer.classList.remove('sidebar-open');
   });
 
   // Handle native swipe-back gestures
@@ -1261,7 +1292,7 @@ function selectExam(exam) {
     const appContainer = el('app-container');
     if (appContainer && !appContainer.classList.contains('view-detail')) {
       appContainer.classList.add('view-detail');
-      history.pushState({ panel: 'detail' }, '', '#detail');
+      try { history.pushState({ panel: 'detail' }, '', '#detail'); } catch(e) {}
     }
 
     renderPaperDetail(virtualPaper);
@@ -1338,6 +1369,7 @@ function init() {
     initSearch();
   } catch (err) {
     console.error('[SyllabusTrack] Init error:', err);
+    document.body.innerHTML += '<div style="position:fixed;top:0;left:0;right:0;background:red;color:white;padding:20px;z-index:9999;font-size:20px;">INIT ERROR: ' + err.message + '</div>';
   }
 }
 

@@ -209,6 +209,20 @@ body {
 .tl-max   { background: var(--tl-max); }
 .traffic-lights:hover .tl { filter: brightness(0.85); }
 
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text-1);
+  cursor: pointer;
+  padding: 4px;
+  z-index: 20;
+}
+
+.mobile-overlay {
+  display: none;
+}
+
 .titlebar-center {
   position: absolute;
   left: 50%; transform: translateX(-50%);
@@ -1341,10 +1355,13 @@ body {
 @media (max-width: 768px) {
   /* Titlebar adjustments */
   .titlebar {
-    justify-content: space-between;
-  }
-  .titlebar-center {
     justify-content: flex-start;
+    gap: 12px;
+  }
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .win-sub, .win-sep { display: none; }
 
@@ -1352,7 +1369,7 @@ body {
   .stats-bar { padding: 0 16px; flex-wrap: wrap; gap: 8px; }
   .sb-chips { display: none; }
 
-  /* Window body handles the sliding panels */
+  /* Window body */
   .window-body {
     position: relative;
     overflow: hidden;
@@ -1360,35 +1377,45 @@ body {
   
   .sidebar-divider { display: none; }
   
-  /* Sidebar fills screen by default */
+  /* Sidebar becomes off-canvas drawer */
   .sidebar {
     position: absolute;
     top: 0; left: 0; bottom: 0;
-    width: 100%;
-    z-index: 10;
+    width: 280px;
+    max-width: 85%;
+    z-index: 30;
     background: var(--bg-panel);
+    transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 2px 0 12px rgba(0,0,0,0.3);
   }
 
-  /* Detail panel starts off-screen to the right */
-  .detail-panel {
+  /* Overlay for sidebar */
+  .mobile-overlay {
+    display: block;
     position: absolute;
-    top: 0; left: 0; bottom: 0;
-    width: 100%;
-    z-index: 20;
-    background: var(--bg-body);
-    transform: translateX(100%);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* When view-detail is active, slide sidebar left and detail in */
-  .app-container.view-detail .sidebar {
-    transform: translateX(-30%);
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 25;
     opacity: 0;
     pointer-events: none;
+    transition: opacity 0.3s ease;
   }
-  .app-container.view-detail .detail-panel {
+
+  /* When sidebar is open */
+  .app-container.sidebar-open .sidebar {
     transform: translateX(0);
+  }
+  .app-container.sidebar-open .mobile-overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Detail panel is always the primary view */
+  .detail-panel {
+    position: relative;
+    width: 100%;
+    z-index: 10;
   }
 
   /* Adjust Hero for mobile */
@@ -1415,8 +1442,8 @@ body {
     padding: 20px;
   }
 
+  /* Welcome grid adjusts for mobile */
   .welcome-grid { grid-template-columns: 1fr; }
-  .welcome-view { display: none !important; } /* Unnecessary on mobile, list is default */
   
   .exam-dialog {
     width: 95%;
