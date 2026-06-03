@@ -1313,6 +1313,17 @@ function normalizeSyllabus() {
   });
 }
 
+function initSidebarAccordion() {
+  document.querySelectorAll('.nav-section-hdr').forEach(hdr => {
+    // Cleanly attach click listener
+    hdr.addEventListener('click', (e) => {
+      // Don't toggle if clicking the add exam button
+      if (e.target.closest('#add-exam-btn')) return;
+      hdr.parentElement.classList.toggle('open');
+    });
+  });
+}
+
 // ─── Init ─────────────────────────────────────────
 function init() {
   try {
@@ -1320,6 +1331,7 @@ function init() {
     initTheme();
     initExams();
     renderSidebar();
+    initSidebarAccordion();
     renderWelcomeGrid();
     updateStatsBar();
     initReset();
