@@ -869,17 +869,57 @@ body {
   min-width: 0;
 }
 
+.nav-section {
+  margin-top: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.nav-section:last-child {
+  border-bottom: none;
+}
+
 .nav-section-hdr {
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--fg-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 8px;
-  padding: 0 4px;
+  padding: 8px 4px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  cursor: pointer;
+}
+.nav-section-hdr:hover {
+  background: var(--bg-hover);
+  border-radius: 6px;
+}
+
+.hdr-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hdr-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-chevron {
+  transition: transform 0.2s;
+  color: var(--fg-muted);
+}
+.nav-section.open .nav-chevron {
+  transform: rotate(90deg);
+}
+
+.nav-items {
+  display: none;
+  padding-bottom: 8px;
+}
+.nav-section.open .nav-items {
+  display: block;
 }
 
 .flex-hdr {

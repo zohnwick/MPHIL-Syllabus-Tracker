@@ -654,9 +654,6 @@ function updateStatsBar() {
   const y1 = calcYearProgress('year1');
   const y2 = calcYearProgress('year2');
   const cl = calcYearProgress('clinical');
-  setText('chip-y1', y1.pct + '%');
-  setText('chip-y2', y2.pct + '%');
-  setText('chip-cl', cl.pct + '%');
   setText('nav-y1-pct', y1.pct + '%');
   setText('nav-y2-pct', y2.pct + '%');
   setText('nav-cl-pct', cl.pct + '%');
@@ -776,9 +773,12 @@ function selectPaper(paperId) {
     const delBtn = el('delete-exam-btn');
     if (delBtn) delBtn.style.display = 'none';
 
-    // Show detail panel on mobile
+    // Show detail panel on mobile and push history state
     const appContainer = el('app-container');
-    if (appContainer) appContainer.classList.add('view-detail');
+    if (appContainer && !appContainer.classList.contains('view-detail')) {
+      appContainer.classList.add('view-detail');
+      history.pushState({ panel: 'detail' }, '', '#detail');
+    }
 
     renderPaperDetail(paper);
 
@@ -1033,10 +1033,17 @@ function initReset() {
     showToast('All progress reset');
   });
 
-  // Mobile Back Button
+  // Mobile Back Button uses history routing
   el('mobile-back-btn')?.addEventListener('click', () => {
-    const appContainer = el('app-container');
-    if (appContainer) appContainer.classList.remove('view-detail');
+    history.back();
+  });
+
+  // Handle native swipe-back gestures
+  window.addEventListener('popstate', (e) => {
+    if (!e.state || e.state.panel !== 'detail') {
+      const appContainer = el('app-container');
+      if (appContainer) appContainer.classList.remove('view-detail');
+    }
   });
 }
 
@@ -1149,7 +1156,10 @@ function initExams() {
       el('paper-view').setAttribute('hidden', 'true');
       
       const appContainer = el('app-container');
-      if (appContainer) appContainer.classList.remove('view-detail');
+      if (appContainer && appContainer.classList.contains('view-detail')) {
+        // Only call history back if we are actually in the detail view state
+        history.back();
+      }
       
       showToast('Exam deleted');
     }
@@ -1247,9 +1257,12 @@ function selectExam(exam) {
     const delBtn = el('delete-exam-btn');
     if (delBtn) delBtn.style.display = 'inline-flex';
 
-    // Show detail panel on mobile
+    // Show detail panel on mobile and push history state
     const appContainer = el('app-container');
-    if (appContainer) appContainer.classList.add('view-detail');
+    if (appContainer && !appContainer.classList.contains('view-detail')) {
+      appContainer.classList.add('view-detail');
+      history.pushState({ panel: 'detail' }, '', '#detail');
+    }
 
     renderPaperDetail(virtualPaper);
 
