@@ -5,12 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#5B4FDB" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <title>SyllabusTrack V2 — RCI MPhil Clinical Psychology</title>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -375,6 +371,19 @@
   </div>
 </div>
 
+<script>
+  // Generate iOS icon dynamically
+  const canvas = document.createElement('canvas');
+  canvas.width = 192; canvas.height = 192;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#5B4FDB'; ctx.beginPath(); ctx.roundRect(0,0,192,192,40); ctx.fill();
+  ctx.font = '100px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('🧠', 96, 104);
+  const link = document.createElement('link');
+  link.rel = 'apple-touch-icon';
+  link.href = canvas.toDataURL();
+  document.head.appendChild(link);
+</script>
 <script src="main.js"></script>
 </body>
 </html>
