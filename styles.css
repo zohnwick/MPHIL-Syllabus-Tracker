@@ -383,6 +383,7 @@ body {
 [data-theme="dark"] .btn-cancel:hover { background: rgba(255,255,255,0.15); }
 .btn-confirm { background: var(--accent); color: white; }
 .btn-confirm:hover { filter: brightness(1.1); }
+.btn.loading { opacity: 0.6; pointer-events: none; cursor: wait; }
 
 .exam-modal { max-width: 550px; text-align: left; display: flex; flex-direction: column; max-height: 85vh; padding: 0; overflow: hidden; }
 .modal-hdr { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--bg-card); }

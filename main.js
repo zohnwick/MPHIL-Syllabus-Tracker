@@ -1268,7 +1268,15 @@ async function signUp() {
   const password = el('auth-password').value;
   if (!email || !password) { showToast('Please enter email and password'); return; }
   
+  const btn = el('auth-signup-btn');
+  btn.classList.add('loading');
+  btn.textContent = 'Creating...';
+  
   const { data, error } = await supabaseClient.auth.signUp({ email, password });
+  
+  btn.classList.remove('loading');
+  btn.textContent = 'Create Account';
+  
   if (error) alert(error.message);
   else showToast('Account created! Logging in...');
 }
@@ -1278,7 +1286,15 @@ async function signIn() {
   const password = el('auth-password').value;
   if (!email || !password) { showToast('Please enter email and password'); return; }
   
+  const btn = el('auth-signin-btn');
+  btn.classList.add('loading');
+  btn.textContent = 'Signing In...';
+  
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  
+  btn.classList.remove('loading');
+  btn.textContent = 'Sign In';
+  
   if (error) alert(error.message);
 }
 
