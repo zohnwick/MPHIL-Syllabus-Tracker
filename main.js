@@ -723,8 +723,11 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-function showPaper(paper) {
+function showPaper(paper, isPopState = false) {
+  if (!isPopState) history.pushState({ view: 'paper', id: paper.id }, '', '#' + paper.id);
   activePaper = paper.id;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  el('view-paper').classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const activeNav = document.querySelector(`.nav-item[data-paper="${paper.id}"]`);
   if (activeNav) activeNav.classList.add('active');
@@ -840,7 +843,8 @@ function showPaper(paper) {
   el('app').classList.remove('sidebar-open');
 }
 
-function goHome() {
+function goHome(isPopState = false) {
+  if (!isPopState) history.pushState({ view: 'home' }, '', window.location.pathname);
   activePaper = null;
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -1059,7 +1063,8 @@ function normalizeSyllabus() {
 }
 
 // --- Notes Logic ---
-window.showNotesView = () => {
+window.showNotesView = (isPopState = false) => {
+  if (!isPopState) history.pushState({ view: 'notes' }, '', '#notes');
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   el('view-notes').classList.add('active');
@@ -1327,6 +1332,10 @@ function setupAuthListener() {
 
 // App Initialization
 function init() {
+  history.replaceState({ view: 'home' }, '', window.location.pathname);
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+  }
   normalizeSyllabus();
   setupAuthListener();
   renderWelcome();
@@ -1373,5 +1382,17 @@ function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+window.addEventListener('popstate', (e) => {
+  const state = e.state;
+  if (!state || state.view === 'home') {
+    goHome(true);
+  } else if (state.view === 'paper') {
+    let p = state.id.startsWith('exam_') ? state.exams.find(ex => ex.id === state.id) : Object.values(SYLLABUS).flatMap(y => y.papers).find(x => x.id === state.id);
+    if (p) showPaper(p, true);
+  } else if (state.view === 'notes') {
+    window.showNotesView(true);
+  }
+});
 
 
